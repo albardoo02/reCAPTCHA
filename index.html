@@ -1,57 +1,30 @@
-<?php
-// サイトキーを入力
-$key = '6Leklr0fAAAAAIIL_tR4Crp_9MxREz3Q_I_PiC4G';
-// シークレット キーを入力
-$secretKey = '6Leklr0fAAAAAHv8t_cDSyMKCrsbh1JzzmN84uat';
-if (isset($_POST['name']) && isset($_POST['password'])) 
-{
-  $Response = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secretKey.'&response='.$_POST['g-recaptcha-response']);
-  $result = json_decode($Response);
-  if ($result->success) 
-  {
-    $message = 'success';
-    $status = 'success';
-  } 
-  else 
-  {
-    $message = $result->{'error-codes'}[0];
-    $status = 'danger';
-  }
-}
-?>
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html lang="ja">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <script type="text/javascript">
-  var onloadCallback = function() {
-    grecaptcha.render('html_element', {
-       'sitekey' : '<?php echo $key ?>'
-    });
-  };
-  </script>
-  <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+<meta charset="UTF-8">
+	<title>reCAPTCHAテスト</title>
+
+	<script src='https://www.google.com/recaptcha/api.js'></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 </head>
+
 <body>
-  <div class="content">
-    <div class="col-sm-5">
-      <?php echo isset($message) ? sprintf('<div class="alert alert-%s" role="alert">%s</div>',$status,$message):'' ?>
-      <form class="form" method="post">
-        <div class="form-group">
-          <label for="formGroupExampleInput">name</label>
-          <input type="text" class="form-control" id="formGroupExampleInput" placeholder="name input" name="name">
-        </div>
-        <div class="form-group">
-          <label for="formGroupExampleInput2">password</label>
-          <input type="password" class="form-control" id="formGroupExampleInput2" placeholder="password input" name="password">
-        </div>
-        <div class="form-group">
-      <div id="html_element"></div>
-    </div>
-        <button type="submit" class="btn btn-primary">送信</button>
-      </form>
-    </div>
-  </div>    
+
+	<form method="post" action="mail.php">
+		<input type="text" name="名前">
+		<input type="text" name="email">
+		<div class="g-recaptcha" data-callback="clearcall" data-sitekey="6Leklr0fAAAAAIIL_tR4Crp_9MxREz3Q_I_PiC4G"></div>
+		<input type="submit" name="button" value="送信" disabled>
+	</form>
+
+	<script type="text/javascript">
+	function clearcall(code) {
+		if(code !== ""){
+			$(':submit[name=button]').removeAttr("disabled");
+		}
+	}
+	</script>
+
 </body>
+</html>
