@@ -1,19 +1,25 @@
-<!DOCTYPE html>
-<html lang="ja">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="css/recaptcha.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+<title>Explicit render after an onload callback</title>
+<script>
+//onload callback function（ページをロードした際に実行される関数）
+var onloadCallback = function() {
+  //ウィジェットを表示するメソッド
+  grecaptcha.render('recaptcha', { 
+    'sitekey' : "6Leklr0fAAAAAIIL_tR4Crp_9MxREz3Q_I_PiC4G",
+    'callback' : myAlert //コールバック関数名
+  });
+};
+//上記 'callback' で指定したコールバック関数の定義
+var myAlert = function(response) {
+  alert("チェックボックスがチェックされました！");
+};
+</script>
 </head>
-  
 <body>
-  <div id="form">
-  <!-- 入力フォームのhtml挿入 -->
-  <div class="g-recaptcha" data-sitekey="6Leklr0fAAAAAIIL_tR4Crp_9MxREz3Q_I_PiC4G"></div>
-  <button id="submit">送信</button>
-</div>
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <form method="post" action="?">
+    <div id="recaptcha"></div>
+  </form>
+  <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script><!-- API の読み込み -->
+</body>
+</html>
