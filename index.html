@@ -1,31 +1,217 @@
-<!DOCTYPE HTML>
-<html lang="ja">
 
-<head>
-<meta charset="UTF-8">
-	<title>reCAPTCHAテスト</title>
-
-	<script src='https://www.google.com/recaptcha/api.js'></script>
-	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-</head>
-
-<body>
-
-	<form method="post" action="mail.php">
-		<input type="text" name="名前">
-		<input type="text" name="email">
-		<div class="g-recaptcha" data-callback="clearcall" data-sitekey="6Leklr0fAAAAAIIL_tR4Crp_9MxREz3Q_I_PiC4G"></div>
-		<input type="submit" name="button" value="送信" disabled>
-	</form>
-
-	<script type="text/javascript">
-	function clearcall(code) {
-		if(code !== ""){
-			$(':submit[name=button]').removeAttr("disabled");
-		}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+<?php
+$RECAPTUER = "[シークレットキー]";
+ 
+$message = null;
+ 
+if (isset($_REQUEST["recaptchaToken"]) == true)	/* 送信ボタンが押された ? */
+{
+	/** トークンチェック */
+	$token = $_REQUEST["recaptchaToken"];
+ 
+	if (token_chk($token) == true)	/* トークンチェックOK */
+	{
+		$message = "<p class=\"OK\">reCAPTCHAチェックOKです。</p>";
 	}
-	</script>
-
+	else
+	{
+		$message = "<p class=\"NG\">reCAPTCHAチェックNGです。</p>";
+	}
+}
+ 
+function token_chk($token)
+{
+	global $RECAPTUER;
+ 
+	/** ステータス初期化 */
+	$sts = false;
+ 
+	$result = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTUER}&response=${token}");
+	$chk = json_decode($result);
+ 
+	if ($chk->success == true)	/* トークンエラー */
+	{
+		$sts = true;
+	}
+ 
+	/** 処理終了 */
+	return $sts;
+}
+ 
+?>
+<!doctype html>
+<html>
+<head>
+<meta charset="shift_jis">
+<title>reCAPTCHAテスト</title>
+<script src="https://www.google.com/recaptcha/api.js?render=[サイトキー]"></script>
+<style type="text/css">
+form 
+{
+	width: 400px;
+	margin-right: auto;
+	margin-left: auto;
+	text-align: center;
+}
+input[type=submit]
+{
+	height: 40px;
+	width: 100px;
+}
+.OK
+{
+	color: #3C0;
+	padding: 10px;
+	border: 10px solid #3C0;
+}
+.NG
+{
+	color: #F00;
+	padding: 10px;
+	border: 10px solid #F00;
+}
+ 
+</style>
+</head>
+<body>
+ 
+<form action="" method="post" enctype="multipart/form-data" id="mail_form">
+<?php echo $message; ?>
+<input type="hidden" name="recaptchaToken" id="recaptchaToken">
+<p>
+送信ボタンを押してください。<br>
+送信完了後F5ボタンを押し、<br>二重送信するとエラーになります。
+</p>
+<input name="" type="submit" value="送信">
+<p><a href="/">リセット</a></p>
+</form>
+<script>
+document.getElementById("mail_form").addEventListener('submit', onSubmit);
+ 
+function onSubmit(e) 
+{
+	e.preventDefault();
+	grecaptcha.ready(function() 
+	{
+		grecaptcha.execute('[サイトキー]', {action: 'submit'}).then(function(token)
+		{
+			// Add your logic to submit to your backend server here.
+			var recaptchaToken = document.getElementById('recaptchaToken');
+			recaptchaToken.value = token;
+			document.getElementById("mail_form").submit();
+		});
+	});
+}
+</script>
+ 
 </body>
 </html>
-
+ 
