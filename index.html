@@ -1,46 +1,65 @@
+<?php
+require 'libs/recaptcha_vars.php';
+// reCAPTCHA サイトキー
+$siteKey = 6Ld1jb0fAAAAANrYQUwED3RKHxNzSM73Xdk5r560;
+// reCAPTCHA シークレットキー
+$secretKey = 6Ld1jb0fAAAAAP6Vw6MwAiDUgmyRsDjQWOoa9hv-;
+ 
+$result_status = '';
+if ( isset( $_POST[ 'g-recaptcha-response' ] ) ) {
+  //API Request URL（リクエストを送る API の URL）
+  $url = 'https://www.google.com/recaptcha/api/siteverify';
+  //パラメータを指定
+  $data = array(
+    'secret' => $secretKey,
+    'response' =>  $_POST[ 'g-recaptcha-response' ]
+  );
+  $context = array(
+    'http' => array(
+      'method'  => 'POST',
+      'header'  => implode("\r\n", array('Content-Type: application/x-www-form-urlencoded',)),
+      'content' => http_build_query($data)
+    )
+  );
+  $api_response = file_get_contents($url, false, stream_context_create($context));
+  $result = json_decode( $api_response );
+  if ( $result->success ) {
+    $result_status = '成功';
+  } else {
+    $result_status = '失敗： ';
+    $result_status .= $result->{'error-codes'}[ 0 ];
+  }
+}
+?>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-</head>
-<body>
-  <form id="rc_form" method="post" action="?">
-    <div id="recaptcha"></div>
-    <button id="send" type="submit">送信</button>
-  </form>
+<title>reCAPTCHA v2 Sample</title>
 <script>
   var onloadCallback = function() {
     grecaptcha.render('recaptcha', {
-      'sitekey' : "6Ld1jb0fAAAAANrYQUwED3RKHxNzSM73Xdk5r560",
+      'sitekey' : "<?php echo $siteKey; ?>",
       'callback' : verifyCallback,
       'expired-callback' : expiredCallback
     });
   };
-  var verifyCallback = function(response) { 
-    document.getElementById('recaptcha').className = "verified";
-    var recaptchaError = document.getElementById('recaptcha_error');
-    if(recaptchaError != null) {
-       recaptchaError.parentNode.removeChild(recaptchaError);
-    } 
+  var verifyCallback = function(response) {
+    document.getElementById("warning").textContent = '';
+    document.getElementById("send").disabled = false;
   };
   var expiredCallback = function() {
-    document.getElementById('recaptcha').classList.remove('verified');
+    document.getElementById("warning").textContent = '送信するにはチェックを入れてください。';
+    document.getElementById("send").disabled = true;
   };
-</script> 
-<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script> 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> 
-<script>
-jQuery(function($){
-  $("#rc_form").submit(function(){
-    $("p.error").remove();
-    if(!$('#recaptcha').hasClass('verified')) {
-      $('#recaptcha').append("<p class='error' id='recaptcha_error'>チェックを入れてください</p>");
-    }
-    
-    if($(".error").length > 0){
-      //alert("Error");
-      return false;
-    }
-  });
-})
 </script>
+</head>
+<body>
+  <form id="rc_form" method="post">
+    <div id="recaptcha"></div>
+    <p id="warning">送信するにはチェックを入れてください。</p>
+    <button id="send" type="submit" class="btn btn-primary" disabled><span>送信</span></button>
+  </form>
+  <p><?php echo $result_status; ?></p>
+<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script> 
 </body>
 </html>
