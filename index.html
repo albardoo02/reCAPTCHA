@@ -1,80 +1,46 @@
-<!DOCTYPE html>
-<html>
-
+<html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>私はロボット？</title>
-  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css" />
-  <!-- Don't use this in production: -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-
 <body>
-  <div id="root"></div>
-  <script type="text/babel">
-    const se = new Audio('tada.wav');
-    const App = () => {
-      const [verified, setVerified] = React.useState(false);
-      React.useEffect(() => {
-        grecaptcha.render('html_element', {
-          sitekey: '6LfY7bwfAAAAANL5mF4FBGjf3I_x-0sfKUtE-1eA',
-          callback: (response) => {
-            se.play();
-            setVerified(true);
-          }
-        });
-      }, []);
-      return (
-        <div>
-          {verified ? (
-            <section className="hero is-primary is-fullheight">
-              <div className="hero-body">
-                <div className="container has-text-centered">
-                  <p className="title">
-                    貴方は人間と証明されました
-                  </p>
-                </div>
-              </div>
-            </section>
-          ) : (
-            <section className="hero is-fullheight">
-              <div className="hero-body">
-                <div className="container has-text-centered">
-                  <p className="title">
-                    私はロボット?
-                  </p>
-                  <p className="subtitle">
-                    下のチェックボックスをクリック
-                  </p>
-                  <div style={{
-                    marginRight: 'auto',
-                    marginLeft: 'auto',
-                    textAlign: 'center',
-                    width: '300px',
-                    marginTop: '20px'
-                  }}>
-                    <div id="html_element"></div>
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
-        </div>
-      )
+  <form id="rc_form" method="post" action="?">
+    <div id="recaptcha"></div>
+    <button id="send" type="submit">送信</button>
+  </form>
+<script>
+  var onloadCallback = function() {
+    grecaptcha.render('recaptcha', {
+      'sitekey' : "6Ld1jb0fAAAAANrYQUwED3RKHxNzSM73Xdk5r560",
+      'callback' : verifyCallback,
+      'expired-callback' : expiredCallback
+    });
+  };
+  var verifyCallback = function(response) { 
+    document.getElementById('recaptcha').className = "verified";
+    var recaptchaError = document.getElementById('recaptcha_error');
+    if(recaptchaError != null) {
+       recaptchaError.parentNode.removeChild(recaptchaError);
+    } 
+  };
+  var expiredCallback = function() {
+    document.getElementById('recaptcha').classList.remove('verified');
+  };
+</script> 
+<script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script> 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> 
+<script>
+jQuery(function($){
+  $("#rc_form").submit(function(){
+    $("p.error").remove();
+    if(!$('#recaptcha').hasClass('verified')) {
+      $('#recaptcha').append("<p class='error' id='recaptcha_error'>チェックを入れてください</p>");
     }
-    const onloadCallback = () => {
-      ReactDOM.render(
-        <App />,
-        document.getElementById('root')
-      );
-    };
-  </script>
-  <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer>
-  </script>
-
+    
+    if($(".error").length > 0){
+      //alert("Error");
+      return false;
+    }
+  });
+})
+</script>
 </body>
-
 </html>
