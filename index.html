@@ -1,8 +1,8 @@
 <?php
 // サイトキーを入力
-$key = '6LdOib4fAAAAAOzbCBe4brJJRk3pe4ASRbCx8r9b';
+$key = '6Leklr0fAAAAAIIL_tR4Crp_9MxREz3Q_I_PiC4G';
 // シークレット キーを入力
-$secretKey = '6LdOib4fAAAAABevRiI2u6JHAhz8tK9ExaEL4D-j';
+$secretKey = '6Leklr0fAAAAAHv8t_cDSyMKCrsbh1JzzmN84uat';
 if (isset($_POST['name']) && isset($_POST['password'])) 
 {
   $Response = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secretKey.'&response='.$_POST['g-recaptcha-response']);
@@ -25,15 +25,14 @@ if (isset($_POST['name']) && isset($_POST['password']))
   <meta charset="UTF-8">
   <title>Title</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <script src="https://www.google.com/recaptcha/api.js?render=<?php echo $key ?>"></script>
-  <script>
-  grecaptcha.ready(function() {
-    grecaptcha.execute('<?php echo $key ?>', {action: 'login'}).then(function(token) {
-    var reCAPTCHA = document.getElementById('recaptcha');
-         reCAPTCHA.value = token;
+  <script type="text/javascript">
+  var onloadCallback = function() {
+    grecaptcha.render('html_element', {
+       'sitekey' : '<?php echo $key ?>'
     });
-  });
+  };
   </script>
+  <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
 </head>
 <body>
   <div class="content">
@@ -41,17 +40,18 @@ if (isset($_POST['name']) && isset($_POST['password']))
       <?php echo isset($message) ? sprintf('<div class="alert alert-%s" role="alert">%s</div>',$status,$message):'' ?>
       <form class="form" method="post">
         <div class="form-group">
-      <label for="formGroupExampleInput">name</label>
-      <input type="text" class="form-control" id="formGroupExampleInput" placeholder="name input" name="name">
+          <label for="formGroupExampleInput">name</label>
+          <input type="text" class="form-control" id="formGroupExampleInput" placeholder="name input" name="name">
+        </div>
+        <div class="form-group">
+          <label for="formGroupExampleInput2">password</label>
+          <input type="password" class="form-control" id="formGroupExampleInput2" placeholder="password input" name="password">
+        </div>
+        <div class="form-group">
+      <div id="html_element"></div>
     </div>
-    <div class="form-group">
-      <label for="formGroupExampleInput2">password</label>
-      <input type="password" class="form-control" id="formGroupExampleInput2" placeholder="password input" name="password">
-    </div>
-    <input type="hidden" name="g-recaptcha-response" id="recaptcha" />
-    <button type="submit" class="btn btn-primary">送信</button>
+        <button type="submit" class="btn btn-primary">送信</button>
       </form>
     </div>
   </div>    
 </body>
-</html>
