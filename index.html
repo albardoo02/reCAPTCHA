@@ -1,217 +1,57 @@
-
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86
-87
-88
-89
-90
-91
-92
-93
-94
-95
-96
-97
-98
-99
-100
-101
-102
-103
-104
-105
-106
-107
-108
 <?php
-$RECAPTUER = "[シークレットキー]";
- 
-$message = null;
- 
-if (isset($_REQUEST["recaptchaToken"]) == true)	/* 送信ボタンが押された ? */
+// サイトキーを入力
+$key = '6LdOib4fAAAAAOzbCBe4brJJRk3pe4ASRbCx8r9b';
+// シークレット キーを入力
+$secretKey = '6LdOib4fAAAAABevRiI2u6JHAhz8tK9ExaEL4D-j';
+if (isset($_POST['name']) && isset($_POST['password'])) 
 {
-	/** トークンチェック */
-	$token = $_REQUEST["recaptchaToken"];
- 
-	if (token_chk($token) == true)	/* トークンチェックOK */
-	{
-		$message = "<p class=\"OK\">reCAPTCHAチェックOKです。</p>";
-	}
-	else
-	{
-		$message = "<p class=\"NG\">reCAPTCHAチェックNGです。</p>";
-	}
+  $Response = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secretKey.'&response='.$_POST['g-recaptcha-response']);
+  $result = json_decode($Response);
+  if ($result->success) 
+  {
+    $message = 'success';
+    $status = 'success';
+  } 
+  else 
+  {
+    $message = $result->{'error-codes'}[0];
+    $status = 'danger';
+  }
 }
- 
-function token_chk($token)
-{
-	global $RECAPTUER;
- 
-	/** ステータス初期化 */
-	$sts = false;
- 
-	$result = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTUER}&response=${token}");
-	$chk = json_decode($result);
- 
-	if ($chk->success == true)	/* トークンエラー */
-	{
-		$sts = true;
-	}
- 
-	/** 処理終了 */
-	return $sts;
-}
- 
 ?>
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-<meta charset="shift_jis">
-<title>reCAPTCHAテスト</title>
-<script src="https://www.google.com/recaptcha/api.js?render=[サイトキー]"></script>
-<style type="text/css">
-form 
-{
-	width: 400px;
-	margin-right: auto;
-	margin-left: auto;
-	text-align: center;
-}
-input[type=submit]
-{
-	height: 40px;
-	width: 100px;
-}
-.OK
-{
-	color: #3C0;
-	padding: 10px;
-	border: 10px solid #3C0;
-}
-.NG
-{
-	color: #F00;
-	padding: 10px;
-	border: 10px solid #F00;
-}
- 
-</style>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://www.google.com/recaptcha/api.js?render=<?php echo $key ?>"></script>
+  <script>
+  grecaptcha.ready(function() {
+    grecaptcha.execute('<?php echo $key ?>', {action: 'login'}).then(function(token) {
+    var reCAPTCHA = document.getElementById('recaptcha');
+         reCAPTCHA.value = token;
+    });
+  });
+  </script>
 </head>
 <body>
- 
-<form action="" method="post" enctype="multipart/form-data" id="mail_form">
-<?php echo $message; ?>
-<input type="hidden" name="recaptchaToken" id="recaptchaToken">
-<p>
-送信ボタンを押してください。<br>
-送信完了後F5ボタンを押し、<br>二重送信するとエラーになります。
-</p>
-<input name="" type="submit" value="送信">
-<p><a href="/">リセット</a></p>
-</form>
-<script>
-document.getElementById("mail_form").addEventListener('submit', onSubmit);
- 
-function onSubmit(e) 
-{
-	e.preventDefault();
-	grecaptcha.ready(function() 
-	{
-		grecaptcha.execute('[サイトキー]', {action: 'submit'}).then(function(token)
-		{
-			// Add your logic to submit to your backend server here.
-			var recaptchaToken = document.getElementById('recaptchaToken');
-			recaptchaToken.value = token;
-			document.getElementById("mail_form").submit();
-		});
-	});
-}
-</script>
- 
+  <div class="content">
+    <div class="col-sm-5">
+      <?php echo isset($message) ? sprintf('<div class="alert alert-%s" role="alert">%s</div>',$status,$message):'' ?>
+      <form class="form" method="post">
+        <div class="form-group">
+      <label for="formGroupExampleInput">name</label>
+      <input type="text" class="form-control" id="formGroupExampleInput" placeholder="name input" name="name">
+    </div>
+    <div class="form-group">
+      <label for="formGroupExampleInput2">password</label>
+      <input type="password" class="form-control" id="formGroupExampleInput2" placeholder="password input" name="password">
+    </div>
+    <input type="hidden" name="g-recaptcha-response" id="recaptcha" />
+    <button type="submit" class="btn btn-primary">送信</button>
+      </form>
+    </div>
+  </div>    
 </body>
 </html>
- 
